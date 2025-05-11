@@ -2,15 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>رفع تقرير فرضية الإخلاء</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f9f9f9;
       padding: 20px;
       margin: 0;
-      text-align: right;
     }
 
     header {
@@ -28,44 +27,46 @@
 
     form {
       max-width: 500px;
-      margin: 0 auto;
+      margin: 20px auto;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
 
-    input, textarea, button {
+    input, textarea, button, label {
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 10px;
+      margin: 10px 0;
       font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
       box-sizing: border-box;
+    }
+
+    .readonly-display {
+      background-color: #f1f1f1;
+      padding: 10px;
+      margin: 5px 0 15px 0;
+      border-radius: 6px;
     }
 
     button {
       background-color: #2e7d32;
       color: white;
+      border: none;
       font-weight: bold;
       cursor: pointer;
-      border: none;
     }
 
-    .success, .error {
+    #responseMessage {
       text-align: center;
-      margin-top: 20px;
       font-weight: bold;
+      margin-top: 20px;
     }
 
-    .success {
-      color: green;
-    }
-
-    .error {
-      color: red;
-    }
+    .success { color: green; }
+    .error { color: red; }
   </style>
 </head>
 <body>
@@ -74,33 +75,70 @@
     <h1>الإدارة العامة للتعليم بمنطقة عسير - المساعد للخدمات - قسم الأمن والسلامة والمرافق</h1>
   </header>
 
-  <form id="reportForm">
-    <input type="text" name="الرقم الإحصائي" placeholder="الرقم الإحصائي" required />
-    <input type="text" name="اسم المدرسة" placeholder="اسم المدرسة" required />
-    <input type="text" name="اسم المدير/ة" placeholder="اسم المدير/ة" required />
-    <input type="text" name="القطاع" placeholder="القطاع" required />
+  <form id="step1">
+    <label>الرقم الإحصائي:</label>
+    <input type="text" id="schoolCode" required />
+    <button type="button" onclick="lookupSchool()">عرض بيانات المدرسة</button>
+  </form>
+
+  <form id="reportForm" style="display:none;" enctype="multipart/form-data">
+    <div class="readonly-display" id="schoolInfo"></div>
+
     <input type="text" name="اسم المنسق/ة" placeholder="اسم منسق/ة الأمن والسلامة" required />
     <input type="tel" name="رقم الجوال" placeholder="رقم الجوال" required />
-    <label>تاريخ تنفيذ الفرضية</label>
+    <label>تاريخ تنفيذ الفرضية:</label>
     <input type="date" name="تاريخ تنفيذ الفرضية" required />
     <input type="number" name="زمن الإخلاء (دقائق)" placeholder="زمن الإخلاء (دقائق)" step="0.1" required />
     <input type="number" name="عدد الطلاب" placeholder="عدد الطلاب المشاركين" required />
     <input type="number" name="عدد المعلمين والإداريين" placeholder="عدد المعلمين والإداريين المشاركين" required />
-    <textarea name="الملاحظات" placeholder="ملاحظات عامة (اختياري)"></textarea>
+    <textarea name="الملاحظات" placeholder="ملاحظات (اختياري)"></textarea>
     <label>رفع ملف التقرير (PDF فقط):</label>
     <input type="file" name="file" accept="application/pdf" required />
+    <input type="hidden" name="الرقم الإحصائي" id="hiddenCode" />
+    <input type="hidden" name="اسم المدرسة" id="hiddenSchoolName" />
+    <input type="hidden" name="القطاع" id="hiddenSector" />
+    <input type="hidden" name="اسم المدير/ة" id="hiddenDirector" />
     <button type="submit">إرسال التقرير</button>
     <div id="responseMessage"></div>
   </form>
 
   <script>
+    const lookupURL = "https://script.google.com/macros/s/AKfycbyXXjUeA3LMpmE6WDV-l3RKOpIzhDzTWthh7vovW2Rvt55RxYknHQo47OMcFuoBo5CKHA/exec";
+    let schoolData = null;
+
+    async function lookupSchool() {
+      const code = document.getElementById("schoolCode").value.trim();
+      if (!code) return alert("يرجى إدخال الرقم الإحصائي.");
+
+      const res = await fetch(`${lookupURL}?code=${code}`);
+      const data = await res.json();
+
+      if (data.success) {
+        schoolData = data;
+        document.getElementById("reportForm").style.display = "block";
+        document.getElementById("schoolInfo").innerHTML = `
+          <strong>اسم المدرسة:</strong> ${data.schoolName}<br>
+          <strong>القطاع:</strong> ${data.sector}<br>
+          <strong>اسم المدير/ة:</strong> ${data.director}
+        `;
+
+        // تعبئة الحقول المخفية
+        document.getElementById("hiddenCode").value = code;
+        document.getElementById("hiddenSchoolName").value = data.schoolName;
+        document.getElementById("hiddenSector").value = data.sector;
+        document.getElementById("hiddenDirector").value = data.director;
+      } else {
+        alert("لم يتم العثور على بيانات لهذا الرقم الإحصائي.");
+      }
+    }
+
     document.getElementById("reportForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
       const responseBox = document.getElementById("responseMessage");
 
-      responseBox.textContent = "📤 جاري إرسال التقرير...";
+      responseBox.textContent = "📤 جاري الإرسال...";
       responseBox.className = "";
 
       try {
@@ -113,13 +151,14 @@
           responseBox.textContent = "✅ تم إرسال التقرير بنجاح.";
           responseBox.className = "success";
           form.reset();
+          form.style.display = "none";
         } else {
-          responseBox.textContent = "❌ حدث خطأ أثناء الإرسال.";
+          responseBox.textContent = "❌ فشل الإرسال.";
           responseBox.className = "error";
         }
       } catch (error) {
         console.error(error);
-        responseBox.textContent = "❌ حدث خلل في الاتصال.";
+        responseBox.textContent = "❌ حدث خطأ أثناء الإرسال.";
         responseBox.className = "error";
       }
     });
@@ -127,4 +166,3 @@
 
 </body>
 </html>
-e
