@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>رفع تقرير فرضية الإخلاء</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      padding: 20px;
+      margin: 0;
+      text-align: right;
+    }
+
+    header {
+      background-color: #ffffff;
+      padding: 15px;
+      border-bottom: 2px solid #2e7d32;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 16px;
+      color: #2e7d32;
+      margin: 0;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #2e7d32;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    .success, .error {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>الإدارة العامة للتعليم بمنطقة عسير - المساعد للخدمات - قسم الأمن والسلامة والمرافق</h1>
+  </header>
+
+  <form id="reportForm">
+    <input type="text" name="الرقم الإحصائي" placeholder="الرقم الإحصائي" required />
+    <input type="text" name="اسم المدرسة" placeholder="اسم المدرسة" required />
+    <input type="text" name="اسم المدير/ة" placeholder="اسم المدير/ة" required />
+    <input type="text" name="القطاع" placeholder="القطاع" required />
+    <input type="text" name="اسم المنسق/ة" placeholder="اسم منسق/ة الأمن والسلامة" required />
+    <input type="tel" name="رقم الجوال" placeholder="رقم الجوال" required />
+    <label>تاريخ تنفيذ الفرضية</label>
+    <input type="date" name="تاريخ تنفيذ الفرضية" required />
+    <input type="number" name="زمن الإخلاء (دقائق)" placeholder="زمن الإخلاء (دقائق)" step="0.1" required />
+    <input type="number" name="عدد الطلاب" placeholder="عدد الطلاب المشاركين" required />
+    <input type="number" name="عدد المعلمين والإداريين" placeholder="عدد المعلمين والإداريين المشاركين" required />
+    <textarea name="الملاحظات" placeholder="ملاحظات عامة (اختياري)"></textarea>
+    <label>رفع ملف التقرير (PDF فقط):</label>
+    <input type="file" name="file" accept="application/pdf" required />
+    <button type="submit">إرسال التقرير</button>
+    <div id="responseMessage"></div>
+  </form>
+
+  <script>
+    document.getElementById("reportForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const responseBox = document.getElementById("responseMessage");
+
+      responseBox.textContent = "📤 جاري إرسال التقرير...";
+      responseBox.className = "";
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbyXXjUeA3LMpmE6WDV-l3RKOpIzhDzTWthh7vovW2Rvt55RxYknHQo47OMcFuoBo5CKHA/exec", {
+          method: "POST",
+          body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+          responseBox.textContent = "✅ تم إرسال التقرير بنجاح.";
+          responseBox.className = "success";
+          form.reset();
+        } else {
+          responseBox.textContent = "❌ حدث خطأ أثناء الإرسال.";
+          responseBox.className = "error";
+        }
+      } catch (error) {
+        console.error(error);
+        responseBox.textContent = "❌ حدث خلل في الاتصال.";
+        responseBox.className = "error";
+      }
+    });
+  </script>
+
+</body>
+</html>
+e
