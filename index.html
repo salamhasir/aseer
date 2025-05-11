@@ -104,7 +104,7 @@
 
   <script>
     const lookupURL = "https://script.google.com/macros/s/AKfycbyXXjUeA3LMpmE6WDV-l3RKOpIzhDzTWthh7vovW2Rvt55RxYknHQo47OMcFuoBo5CKHA/exec";
-    let schoolData = null;
+    const submissionURL = "https://script.google.com/macros/s/AKfycby6frIpZoaRWZxsxEgWO2-q0zmOJAXVGRuo8rLfLKmrILo4UNuFct2ioYb6aooc_Y5OPw/exec";
 
     async function lookupSchool() {
       const code = document.getElementById("schoolCode").value.trim();
@@ -114,15 +114,12 @@
       const data = await res.json();
 
       if (data.success) {
-        schoolData = data;
         document.getElementById("reportForm").style.display = "block";
         document.getElementById("schoolInfo").innerHTML = `
           <strong>اسم المدرسة:</strong> ${data.schoolName}<br>
           <strong>القطاع:</strong> ${data.sector}<br>
           <strong>اسم المدير/ة:</strong> ${data.director}
         `;
-
-        // تعبئة الحقول المخفية
         document.getElementById("hiddenCode").value = code;
         document.getElementById("hiddenSchoolName").value = data.schoolName;
         document.getElementById("hiddenSector").value = data.sector;
@@ -142,7 +139,7 @@
       responseBox.className = "";
 
       try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbyXXjUeA3LMpmE6WDV-l3RKOpIzhDzTWthh7vovW2Rvt55RxYknHQo47OMcFuoBo5CKHA/exec", {
+        const response = await fetch(submissionURL, {
           method: "POST",
           body: formData
         });
