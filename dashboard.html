@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة تحكم الإخلاء</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f1f1f1;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 18px;
+    }
+    .container {
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 22px;
+      color: #2e7d32;
+    }
+    .card p {
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>لوحة التحكم - تقارير الإخلاء</header>
+  <div class="container">
+    <div class="card"><h2>إجمالي المدارس:</h2><p id="total">جاري التحميل...</p></div>
+    <div class="card"><h2>نفذت خطة الإخلاء:</h2><p id="confirmed">جاري التحميل...</p></div>
+    <div class="card"><h2>المدارس المتبقية:</h2><p id="remaining">جاري التحميل...</p></div>
+    <div class="card">
+      <h2>عدد المدارس حسب القطاع:</h2>
+      <ul id="sectors" style="padding-right: 20px;"></ul>
+    </div>
+  </div>
+
+  <script>
+    const dashboardURL = "https://script.google.com/macros/s/AKfycbykLY-uyKjmz6xFcOtepUd5-7Em6UyZaStaKX1GWzKdkxfmqkXzpU3NjBBsbbe9bahQjQ/exec?type=dashboard";
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch(dashboardURL);
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById("total").textContent = data.total;
+          document.getElementById("confirmed").textContent = data.confirmed;
+          document.getElementById("remaining").textContent = data.remaining;
+
+          const sectorsList = document.getElementById("sectors");
+          sectorsList.innerHTML = "";
+
+          for (const [sector, count] of Object.entries(data.sectors)) {
+            const li = document.createElement("li");
+            li.textContent = `${sector}: ${count} مدرسة`;
+            sectorsList.appendChild(li);
+          }
+        } else {
+          alert("تعذر تحميل البيانات.");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("حدث خطأ أثناء تحميل البيانات.");
+      }
+    }
+
+    window.onload = loadDashboard;
+  </script>
+
+</body>
+</html>
