@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -145,6 +144,7 @@
           });
           const result = await response.json();
           if (result.success) {
+            alert("✅ تم إرسال التقرير بنجاح.\nشكرًا لك، تم رفع البيانات بنجاح.");
             responseBox.textContent = "✅ تم إرسال التقرير بنجاح.";
             responseBox.className = "success";
             form.reset();
