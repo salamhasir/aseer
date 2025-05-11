@@ -95,8 +95,8 @@
   </form>
 
   <script>
-    const lookupURL = "https://script.google.com/macros/s/AKfycbyIul-i1NPEkqZoQ-_TJ-_JBIK4e2N8tXS83hQYG8TMk6wFbrWzsZAQQFbCSpt6V8WNmw/exec";
-    const submissionURL = "https://script.google.com/macros/s/PUT-YOUR-SUBMISSION-SCRIPT-ID-HERE/exec"; // ← استبدل هذا بالرابط الفعلي
+    const lookupURL = "https://script.google.com/macros/s/AKfycbz0Q6ugwClFETadxSoVQkBFa3O1Uwopn1bqsLXA7_seaXRAQbYCLg8ZOVpr80d6xC5E/exec";
+    const submissionURL = "https://script.google.com/macros/s/PUT-YOUR-SUBMISSION-SCRIPT-ID/exec"; // استبدله برابط سكربت الإرسال
 
     async function lookupSchool() {
       const code = document.getElementById("schoolCode").value.trim();
@@ -121,35 +121,45 @@
       }
     }
 
-    document.getElementById("reportForm").addEventListener("submit", async function(e) {
+    document.getElementById("reportForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const form = e.target;
-      const formData = new FormData(form);
       const responseBox = document.getElementById("responseMessage");
-
       responseBox.textContent = "📤 جاري الإرسال...";
       responseBox.className = "";
 
-      try {
-        const response = await fetch(submissionURL, {
-          method: "POST",
-          body: formData
-        });
-        const result = await response.json();
-        if (result.success) {
-          responseBox.textContent = "✅ تم إرسال التقرير بنجاح.";
-          responseBox.className = "success";
-          form.reset();
-          form.style.display = "none";
-        } else {
-          responseBox.textContent = "❌ فشل الإرسال.";
+      const formData = new FormData(form);
+      const fileInput = form.querySelector('input[type="file"]');
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = async function () {
+        const base64File = reader.result.split(",")[1];
+        formData.append("file", base64File);
+
+        try {
+          const response = await fetch(submissionURL, {
+            method: "POST",
+            body: formData
+          });
+          const result = await response.json();
+          if (result.success) {
+            responseBox.textContent = "✅ تم إرسال التقرير بنجاح.";
+            responseBox.className = "success";
+            form.reset();
+            form.style.display = "none";
+          } else {
+            responseBox.textContent = "❌ فشل الإرسال.";
+            responseBox.className = "error";
+          }
+        } catch (error) {
+          console.error(error);
+          responseBox.textContent = "❌ حدث خطأ أثناء الإرسال.";
           responseBox.className = "error";
         }
-      } catch (error) {
-        console.error(error);
-        responseBox.textContent = "❌ حدث خطأ أثناء الإرسال.";
-        responseBox.className = "error";
-      }
+      };
+
+      reader.readAsDataURL(file);
     });
   </script>
 
