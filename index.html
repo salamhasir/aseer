@@ -99,7 +99,7 @@
     const submissionURL = "https://script.google.com/macros/s/AKfycbw11iEgZdjyXwGJ-2z_s6YOSp-7EECOuVWZAhulFjnf2s_5fiDK38ceo2wge7PtCgtVnQ/exec";
 
     async function lookupSchool() {
-      const code = document.getElementById("schoolCode").value.trim();
+      const code = document.getElementById("schoolCode").value.trim().toUpperCase();
       if (!code) return alert("يرجى إدخال الرقم الإحصائي.");
 
       const res = await fetch(`${lookupURL}?code=${code}`);
